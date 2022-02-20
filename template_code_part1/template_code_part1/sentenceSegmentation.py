@@ -1,7 +1,8 @@
 from util import *
 
 # Add your import statements here
-
+import nltk
+nltk.download('punkt')
 
 
 
@@ -25,6 +26,7 @@ class SentenceSegmentation():
 		segmentedText = None
 
 		#Fill in code here
+		segmentedText = text.split(".")
 
 		return segmentedText
 
@@ -50,5 +52,7 @@ class SentenceSegmentation():
 		segmentedText = None
 
 		#Fill in code here
+		tokenizer = nltk.data.load('nltk:tokenizers/punkt/english.pickle')
+		segmentedText = tokenizer.tokenize(text)
 		
 		return segmentedText
