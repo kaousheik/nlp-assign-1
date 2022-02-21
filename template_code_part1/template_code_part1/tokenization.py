@@ -1,7 +1,8 @@
 from util import *
 
 # Add your import statements here
-
+import nltk
+nltk.download()
 
 
 
@@ -25,6 +26,7 @@ class Tokenization():
 		tokenizedText = None
 
 		#Fill in code here
+		tokenizedText = text.split(" ")
 
 		return tokenizedText
 
@@ -48,5 +50,5 @@ class Tokenization():
 		tokenizedText = None
 
 		#Fill in code here
-
+		tokenizedText = nltk.word_tokenize(text)
 		return tokenizedText
