@@ -1,3 +1,4 @@
+from cgitb import text
 from util import *
 
 # Add your import statements here
@@ -23,10 +24,11 @@ class Tokenization():
 			A list of lists where each sub-list is a sequence of tokens
 		"""
 
-		tokenizedText = None
+		tokenizedText = []
 
 		#Fill in code here
-		tokenizedText = text.split(" ")
+		for sentence in text:
+			tokenizedText.append(sentence.split(" "))
 
 		return tokenizedText
 
@@ -47,8 +49,9 @@ class Tokenization():
 			A list of lists where each sub-list is a sequence of tokens
 		"""
 
-		tokenizedText = None
+		tokenizedText = []
 
 		#Fill in code here
-		tokenizedText = nltk.word_tokenize(text)
+		for sentence in text:
+			tokenizedText.append(nltk.word_tokenize(sentence))
 		return tokenizedText
