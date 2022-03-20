@@ -72,7 +72,7 @@ class Evaluation():
 			The mean precision value as a number between 0 and 1
 		"""
 
-		meanPrecision = -1
+		meanPrecision = 0
 
 		#Fill in code here
 		N = len(query_ids)
@@ -158,7 +158,7 @@ class Evaluation():
 			The mean recall value as a number between 0 and 1
 		"""
 
-		meanRecall = -1
+		meanRecall = 0
 
 		#Fill in code here
 		N = len(query_ids)
@@ -236,7 +236,7 @@ class Evaluation():
 			The mean fscore value as a number between 0 and 1
 		"""
 
-		meanFscore = -1
+		meanFscore = 0
 
 		#Fill in code here
 		N = len(query_ids)
@@ -306,7 +306,11 @@ class Evaluation():
 						break
 				IDCG += rel/math.log((i+2),2) 
 		
-		nDCG = DCG/IDCG
+		if DCG == 0 or IDCG == 0:
+				nDCG = 0
+		else:	
+				nDCG = DCG/IDCG
+
 		return nDCG
 
 	def meanNDCG(self, doc_IDs_ordered, query_ids, qrels, k):
@@ -334,7 +338,7 @@ class Evaluation():
 			The mean nDCG value as a number between 0 and 1
 		"""
 
-		meanNDCG = -1
+		meanNDCG = 0
 
 		#Fill in code here
 		N = len(query_ids)
@@ -342,11 +346,10 @@ class Evaluation():
 		for i,ids in enumerate(doc_IDs_ordered):
 				true_ids = []
 				while int(qrels[count]["query_num"]) == query_ids[i]:
-						true_ids.append(int(qrels[count]["id"]))
+						true_ids.append((int(qrels[count]["id"]), 5-int(qrels[count]["position"])))
 						count += 1
 						if count == len(qrels):
 								break
-				
 				meanNDCG += self.queryNDCG(ids, query_ids[i], true_ids, k) / N
 		return meanNDCG
 
@@ -380,18 +383,21 @@ class Evaluation():
 		#Fill in code here
 		retrieved_count = 0
 		relavant_docs_count = 0
-		precision_sum = 0
+		precision_sum = 0.0
 		
 		for id in query_doc_IDs_ordered:
 				retrieved_count += 1
 				if id in true_doc_IDs:
 						relavant_docs_count += 1
-				precision_sum += relavant_docs_count / retrieved_count
+						precision_sum += (relavant_docs_count / retrieved_count)
 			
 				if retrieved_count == k:                                       
 						break
 		
-		avgPrecision = precision_sum / max(relavant_docs_count,1)
+		if relavant_docs_count == 0 or precision_sum == 0:
+				avgPrecision = 0
+		else:
+				avgPrecision = precision_sum / relavant_docs_count
 		return avgPrecision
 
 
@@ -420,7 +426,7 @@ class Evaluation():
 			The MAP value as a number between 0 and 1
 		"""
 
-		meanAveragePrecision = -1
+		meanAveragePrecision = 0
 
 		#Fill in code here
 		N = len(query_ids)
@@ -433,6 +439,6 @@ class Evaluation():
 						if count == len(qrels):
 								break
 				
-				meanAveragePrecision += self.queryAveragePrecision(ids, query_ids[i], true_ids, k) / N
+				meanAveragePrecision += (self.queryAveragePrecision(ids, query_ids[i], true_ids, k) / N)
 		return meanAveragePrecision
 
