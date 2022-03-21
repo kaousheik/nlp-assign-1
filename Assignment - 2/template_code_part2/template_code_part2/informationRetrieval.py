@@ -1,8 +1,9 @@
 from util import *
 
+
 # Add your import statements here
-import numpy as np
 import operator
+import numpy as np
 from numpy import dot
 from numpy.linalg import norm
 
@@ -32,39 +33,44 @@ class InformationRetrieval():
 		index = None
 
 		#Fill in code here
-
-		self.index = index
-		D = len(docs)
+		index = {}
+		N = len(docs)
 		words_list = []
+		tmp = -1
 
+		# list containing all the words in doc
 		for doc in docs:
 				for sentence in doc:
 						for word in sentence:
 								words_list.append(word)
 
-		self.list_unique = list(set(words_list))
-		df = np.zeros(len(self.list_unique))
-		TD_matrix = np.zeros([len(self.list_unique),len(docs)])
+		vis = {}
+		for word in words_list:
+				vis[word] = True
+		self.vocab = [ word for word in vis ] # Vocab contains list of unique words in docs
+		self.doc_weights = np.zeros([len(self.vocab),len(docs)])
+
+		# Building vectors for doc
+		df = np.zeros(len(self.vocab))
+		TD_matrix = np.zeros([len(self.vocab),len(docs)])
 
 		for i, doc in enumerate(docs):
-				for j, sentence in enumerate(doc):
+				for sentence in doc:
 						for word in sentence:
 								try:
-										TD_matrix[self.list_unique.index(word),i] += 1
+										TD_matrix[self.vocab.index(word),i] += 1
 								except:
 										tmp = 0
 		
 		df = np.sum(TD_matrix > 0, axis=1)
-		self.IDF = np.log(D/df)
-		self.doc_weights = np.zeros([len(self.list_unique),len(docs)])
+		self.IDF = np.log(N/df)
 
-		for i in range(len(self.list_unique)):
+		for i in range(len(self.vocab)):
 				self.doc_weights[i,:] = self.IDF[i]*TD_matrix[i,:]
 
-
-		index = {key: None for key in docIDs}
-		for j in range(len(docs)): 
-				index[docIDs[j]] = self.doc_weights[:,j]
+		for i in range(len(docs)): 
+				index[docIDs[i]] = self.doc_weights[:,i]
+		
 		self.index = index
 
 	def rank(self, queries):
@@ -87,29 +93,30 @@ class InformationRetrieval():
 
 		doc_IDs_ordered = []
 
-		TQ_matrix = np.zeros([len(self.list_unique),len(queries)])
-		for i, unique_word in enumerate(self.list_unique):
+		#Fill in code here
+		doc_IDs_ordered  = [ i for i in range(len(queries)) ]
+		TQ_matrix = np.zeros([len(self.vocab),len(queries)])
+
+		# Building Query vector
+		for i, vocab_word in enumerate(self.vocab):
 				for j, query in enumerate(queries):
-						for k, sentence in enumerate(query):
+						for sentence in query:
 								for word in sentence:
-										if unique_word == word:
+										if vocab_word == word:
 												TQ_matrix[i,j] += 1
 
-		self.query_weights = np.zeros([len(self.list_unique),len(queries)])
-		for i, unique_word in enumerate(self.list_unique):
+		self.query_weights = np.zeros([len(self.vocab),len(queries)])
+		for i, vocab_word in enumerate(self.vocab):
 				self.query_weights[i,:] = self.IDF[i]*TQ_matrix[i,:]
 
-		id_docs = list(self.index.keys())
-		doc_IDs_ordered  = list(range(len(queries)))
+		# Taking cosine similarity between query and each doc
 		for j in range(len(queries)):
-				dict_cosine = {key: None for key in id_docs}
+				cos_sim = {}
 				for doc_id, doc_vector in self.index.items():
-						a = doc_vector
-						b = self.query_weights[:,j]
-						dict_cosine[doc_id] = dot(a,b)/(norm(a)*norm(b))
+						cos_sim[doc_id] = dot( doc_vector ,self.query_weights[:,j] )
+						cos_sim[doc_id] /= (norm(doc_vector)*norm(self.query_weights[:,j]))
 
-				dc_sort = sorted(dict_cosine.items(),key = operator.itemgetter(1),reverse = True)
+				dc_sort = sorted(cos_sim.items(), key = operator.itemgetter(1), reverse = True)
 				doc_IDs_ordered[j] = [x for x, _ in dc_sort]
 	
 		return doc_IDs_ordered
-
